@@ -1,7 +1,7 @@
 <script>
 	var bizData = [
 		{
-			TYPE     			: "TYPE1",
+			TYPE     			: "IBM",
 			NAME1    			: "Noel Lehitimas",
 			BIZPART_ID      	: "100001",
 			EXT_PARTNER      	: "EXT_PARTNER1",
@@ -9,7 +9,7 @@
 			DEL_FLAG    		: true
 		},
 		{
-			TYPE     			: "TYPE2",
+			TYPE     			: "ACT",
 			NAME1    			: "Noel Lehitimas2",
 			BIZPART_ID      	: "100002",
 			EXT_PARTNER      	: "EXT_PARTNER2",
@@ -27,14 +27,48 @@
 				}
 			}
 			return filteredBP;
+		},
+		_updateById : function(id){
+			let busyDialog = showBusyDialog("Please wait loading..");
+				busyDialog.open();
+			
+			bizData.map(bp_id => {
+				if (bp_id.BIZPART_ID == id) {
+				 
+						bp_id.NAME1    			= ui('BP_TYPE_REGNAME').getValue().trim();
+						bp_id.TYPE     			= ui('BP_TYPE_INFO').getSelectedKey();
+						bp_id.NAME1    			= ui('BP_TYPE_REGNAME').getValue().trim();
+						bp_id.BIZPART_ID      	= ui('INPUT_BP_ID').getValue().trim();
+						bp_id.EXT_PARTNER      	= ui('BP_TYPE_EXTPARTNER').getValue().trim();
+						bp_id.SOURCE_SYS     	= ui('INPUT_CONTROL_INFO_SOURCE_SYS').getValue().trim();
+						bp_id.DEL_FLAG    		= ui('CONTROL_INFO_DEL_FLAG').getState();
+				}
+				
+			});
+			screenMode._display(id);
+			listingBp._getData(bizData);
+			setTimeout(() => {busyDialog.close();}, 2000);
 		}
 	}
 
 	const screenMode = {
+		_id : "",
+		_title : "",
+		_mode : "",
 		_create : function(){
+			this._mode = "create";
+			let bp_title = this._title;
+			bp_title = "Create Business Partner";
+			this._clear();
 			//Buttons
 			ui("CREATE_BP_SAVE_BTN").setVisible(true);
 			ui("CREATE_BP_EDIT_BTN").setVisible(false);
+			ui("CREATE_BP_CANCEL_BTN").setVisible(false);
+
+			//title and crumbs
+			ui('BP_TITLE').setText(bp_title);
+			ui('CREATE_BP_BRDCRMS').setCurrentLocationText(bp_title);
+			ui("PANEL_FORM").setTitle("New Business Partner");
 
 			//Fields
 			ui('BP_TYPE_INFO').setEditable(true);
@@ -42,37 +76,72 @@
 			ui('INPUT_BP_ID').setEditable(true);
 			ui('BP_TYPE_EXTPARTNER').setEditable(true);
 			ui('INPUT_CONTROL_INFO_SOURCE_SYS').setEditable(true);
-			ui('CONTROL_INFO_DEL_FLAG').setState(true);
+			ui('CONTROL_INFO_DEL_FLAG').setEnabled(true);
+
+			go_App_Right.to('CREATE_BP_PAGE');
 		},
 		_edit : function(){
+			this._mode = "edit";
 			//Buttons
 			ui("CREATE_BP_SAVE_BTN").setVisible(true);
 			ui("CREATE_BP_EDIT_BTN").setVisible(false);
+			ui("CREATE_BP_CANCEL_BTN").setVisible(true);
+
+			//Fields
+			ui('BP_TYPE_INFO').setEditable(true);
+			ui('BP_TYPE_REGNAME').setEditable(true);
+			ui('INPUT_BP_ID').setEditable(false);
+			ui('BP_TYPE_EXTPARTNER').setEditable(true);
+			ui('INPUT_CONTROL_INFO_SOURCE_SYS').setEditable(true);
+			ui('CONTROL_INFO_DEL_FLAG').setEnabled(true);
 		},
 		_display : function(id){
+			this._mode = "display";
+			this._id = id;
+			let bp_title = this._title;
+			bp_title = "Display Business Partner";
 			//Buttons
 			ui("CREATE_BP_SAVE_BTN").setVisible(false);
 			ui("CREATE_BP_EDIT_BTN").setVisible(true);
+			ui("CREATE_BP_CANCEL_BTN").setVisible(false);
 
 
 			//fields with value
 			let data = bpDataOrganizer._filteredById(id);
 			if(data.length > 0){
-				ui('BP_TYPE_INFO').setValue(data[0].TYPE).setEditable(false);
+				ui('BP_TYPE_INFO').setSelectedKey(data[0].TYPE).setEditable(false);
        			ui('BP_TYPE_REGNAME').setValue(data[0].NAME1).setEditable(false);
         		ui('INPUT_BP_ID').setValue(data[0].BIZPART_ID).setEditable(false);
 				ui('BP_TYPE_EXTPARTNER').setValue(data[0].EXT_PARTNER).setEditable(false);
 				ui('INPUT_CONTROL_INFO_SOURCE_SYS').setValue(data[0].SOURCE_SYS).setEditable(false);
 				ui('CONTROL_INFO_DEL_FLAG').setState(data[0].DEL_FLAG).setEnabled(false);
+			
+			
+				//title and crumbs
+				ui('BP_TITLE').setText(bp_title);
+				ui('CREATE_BP_BRDCRMS').setCurrentLocationText(bp_title);
+				ui("PANEL_FORM").setTitle("Business Partner ID "+"("+data[0].BIZPART_ID+")");
+
+				go_App_Right.to('CREATE_BP_PAGE');
 			}			
+		},
+		_clear : function(){
+			ui('BP_TYPE_INFO').setValue("");
+			ui('BP_TYPE_REGNAME').setValue("");
+			ui('INPUT_BP_ID').setValue("");
+			ui('BP_TYPE_EXTPARTNER').setValue("");
+			ui('INPUT_CONTROL_INFO_SOURCE_SYS').setValue("");
+			ui('CONTROL_INFO_DEL_FLAG').setEnabled(true);
 		}
+	
+	
 	};
 
     const createBP = () => {
 		let busyDialog = showBusyDialog("Please wait loading..");
 		busyDialog.open();
 		let data_for_general = {
-			TYPE     			: ui('BP_TYPE_INFO').getValue().trim(),
+			TYPE     			: ui('BP_TYPE_INFO').getSelectedKey(),
 			NAME1    			: ui('BP_TYPE_REGNAME').getValue().trim(),
 			BIZPART_ID      	: ui('INPUT_BP_ID').getValue().trim(),
 			EXT_PARTNER      	: ui('BP_TYPE_EXTPARTNER').getValue().trim(),
