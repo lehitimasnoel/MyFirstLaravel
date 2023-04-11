@@ -23,6 +23,7 @@
     
     $(document).ready(function () {	
         CreateContent();
+        ui('LEFT_MENU_TEMPLATE-MENU_LIST-0').firePress();
 	});
 
    
