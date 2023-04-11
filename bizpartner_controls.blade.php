@@ -12,7 +12,7 @@
         go_App_Right.addPage(createBizPage());	
 		go_App_Right.addPage(createDisplayBizPage());
 		go_App_Right.addPage(createListBP());
-
+		go_App_Right.addPage(createTestPage());
 
         go_SplitContainer = new sap.ui.unified.SplitContainer({ content: [go_App_Right], secondaryContent: [go_App_Left]});		
         go_SplitContainer.setSecondaryContentWidth("250px");
@@ -51,7 +51,7 @@
 				
 				switch(menu){
 					case "CREATE_BP" :
-						go_App_Right.to('CREATE_BP_PAGE');
+						screenMode._create();
 					break;
 					case "DISPLAY_BP" :
 						go_App_Right.to('BP_PAGE_DISPLAY');
@@ -60,6 +60,10 @@
 
 						listingBp._getData(bizData);
 						go_App_Right.to('PAGE_BP_LISTING');
+					break;
+					case "BP_TEST" :
+
+						go_App_Right.to('TEST_PAGE');
 					break;
 
 				}
@@ -84,6 +88,12 @@
                     title   : "Business Partner Listing",
                     icon    : "sap-icon://checklist-item",
 					funct  	: "BP_LIST",
+                    visible : true
+                },
+				{
+                    title   : "Test",
+                    icon    : "sap-icon://checklist-item",
+					funct  	: "BP_TEST",
                     visible : true
                 }
 
@@ -110,7 +120,7 @@
 			contentLeft:[
 				new sap.m.Button({ icon:"sap-icon://nav-back",
 					press:function(oEvt){
-						
+						go_App_Right.back();
 					} 
 				}),
 				new sap.m.Button({icon:"sap-icon://menu2",
@@ -127,7 +137,7 @@
 				
 			],
 			contentMiddle:[
-                new sap.m.Label("",{text:"Create Business Partner"})
+                new sap.m.Label("BP_TITLE",{text:"Create Business Partner"})
             ],
 		
 		});
@@ -150,20 +160,20 @@
             ]
         });
 
-        let createPageForm = new sap.uxap.ObjectPageLayout({
+        let createPageFormHeader = new sap.uxap.ObjectPageLayout({
             headerTitle:[
                 new sap.uxap.ObjectPageHeader("OBJECTHEADER_BP_NAME",{
                     objectTitle:"",
 					showPlaceholder : false,
 					actions:[
-                        new sap.uxap.ObjectPageHeaderActionButton("CREATE_BP_SAVE_BTN",{
+                        new sap.uxap.ObjectPageHeaderActionButton("CREATE_BP_SAVE_BTN1",{
                             icon: "sap-icon://save",
 							press: function(evt){
 								createBP();
 
                             }
                         }).addStyleClass("sapMTB-Transparent-CTX"),
-                        new sap.uxap.ObjectPageHeaderActionButton("CREATE_BP_EDIT_BTN",{
+                        new sap.uxap.ObjectPageHeaderActionButton("CREATE_BP_EDIT_BTN1",{
                             icon: "sap-icon://edit",
 							press: function(){
 									ui("COMPCODE_SAVE_DIALOG").open();
@@ -172,198 +182,118 @@
 
                     ],
                 })
-            ],
-            sections:[
-                new sap.uxap.ObjectPageSection("GENERAL_DATA_TAB",{
-                    title: "General Info",
-                    subSections : [
-                        new sap.uxap.ObjectPageSubSection({
-                            title: "",
-							blocks:[
-                                new sap.m.Panel({
-                                    content: [
-                                        new sap.ui.layout.Grid({
-                                            defaultSpan:"L12 M12 S12",
-											width:"auto",
-											content:[
-                                                new sap.ui.layout.form.SimpleForm({
-                                                    maxContainerCols:2,
-													labelMinWidth:130,
-													content:[
-                                                        new sap.ui.core.Title("GENERAL_INFO_TITLE1",{text:""}),
+            ]     
+        });
 
-                                                        new sap.m.Label({text:"Business Partner Type",width:"160px"}).addStyleClass('class_label_padding'),
-														new sap.m.Input("BP_TYPE_INFO",{value:"", width:TextWidth}),
-
-                                                        new sap.m.Label({text:"Registered Name",width:labelWidth}).addStyleClass('class_label_padding'),
-														new sap.m.Input("BP_TYPE_REGNAME",{value:"", width:TextWidth}),
-                                                        
-                                                        new sap.m.Label({text:"Business Partner ID",width:"150px"}).addStyleClass('class_label_padding'),
-														new sap.m.Input("INPUT_BP_ID",{
-															value:"", 
-															width:TextWidth,
-															liveChange : function(oEvt){
-																var lv_value = oEvt.getSource().getValue().trim();
-																//if(gv_partner_ind){
-																	//var lv_obj_header = ""
-																	//var label = "New Business Partner"
-																	//lv_obj_header = label + " (" + lv_value + ")";
-																	//ui("OBJECTHEADER_BP_NAME").setObjectTitle(lv_obj_header).setObjectSubtitle("");
-																//}
-															}
-														}),
-                                                        new sap.ui.core.Title("GENERAL_INFO_TITLE2",{text:""}),
-
-                                                        new sap.m.Label({text:"External Partner",width:labelWidth}).addStyleClass('class_label_padding'),
-														new sap.m.Input("BP_TYPE_EXTPARTNER",{value:"", width:TextWidth}),
-														
-														new sap.m.Label({text:"Source System",width:labelWidth}).addStyleClass('class_label_padding'),
-														new sap.m.Input("INPUT_CONTROL_INFO_SOURCE_SYS",{width:TextWidth}),
-															
-                                                        new sap.m.Label({text:"Deletion Flag",width:labelWidth}).addStyleClass('class_label_padding'),
-														new sap.m.Switch("CONTROL_INFO_DEL_FLAG",{state:false}),
-                                                    ]
-                                                })
-                                            ]
-                                        })
-                                    ]
-                                })
-                            ]
+		let createPageFormContent = new sap.m.Panel("BP_GENERAL_PANEL",{
+			headerToolbar: [
+				new sap.m.Toolbar({
+                    content: [
+                        new sap.m.ToolbarSpacer(),
+                        new sap.m.Button("CREATE_BP_SAVE_BTN", {
+                            visible: true,
+                            icon: "sap-icon://save",
+                            press: function () {
+								if(screenMode._mode == "create"){
+									createBP();
+								}else{
+									bpDataOrganizer._updateById(screenMode._id);
+								}
+                            }
                         }),
-                        new sap.uxap.ObjectPageSubSection({
-                            title: "ADDRESS",
-                            blocks:[]
-                        })
-                    ]        
-                }),
-                new sap.uxap.ObjectPageSection("COMP_CODE_TAB",{
-					title: "Company Code",
-					subSections:[
-						new sap.uxap.ObjectPageSubSection({
-							blocks:[
-								new sap.m.Panel({
-									content:[
-										new sap.ui.table.Table("GO_TABLE_COMPCODE",{
-											visibleRowCount:8,
-											selectionMode:"None",
-											enableCellFilter: true,
-											enableColumnReordering:true,
-											toolbar:[
-												new sap.m.Toolbar({
-													design:"Transparent",
-													content:[
-														new sap.m.Text("TABLE_LABEL_COMPCODE",{text:"Company Code (0)"}),
-														new sap.m.ToolbarSpacer(),
-														new sap.m.Button ("COMPCODE_ADD_BUTTON",{
-															icon: "sap-icon://add",
-															press: function(){
-																gv_bind_mode = "create";
-																ui('COMPCODE_FORM_DIALOG').open();
-															}
-														})
-													]
-												})
-											],
-											columns:[
-												
-												new sap.ui.table.Column({label:new sap.m.Text({text:"Company Code"}),
-													autoResizable:true,
-													sortProperty:"COMPANY_DESC",
-													filterProperty:"COMPANY_DESC",
-													autoResizable:true,
-													template:new sap.m.Text({text:"{COMPANY_DESC}",maxLines:1,tooltip:"{COMPANY_DESC}"})
-												}),
-												new sap.ui.table.Column({label:new sap.m.Text({text:"Business Reg No"}),
-													autoResizable:true,
-													sortProperty:"BIZ_REG",
-													filterProperty:"BIZ_REG",
-													autoResizable:true,
-													template:new sap.m.Text({text:"{BIZ_REG}",maxLines:1,tooltip:"{BIZ_REG}"})
-												}),
-												new sap.ui.table.Column({label:new sap.m.Text({text:"Payment Term"}),
-													autoResizable:true,
-													sortProperty:"PYMT_TERM",
-													filterProperty:"PYMT_TERM",
-													autoResizable:true,
-													template:new sap.m.Text({text:"{PYMT_TERM}",maxLines:1,tooltip:"{PYMT_TERM}"})
-												}),
-												new sap.ui.table.Column({label:new sap.m.Text({text:"GST Reg No"}),
-													autoResizable:true,
-													sortProperty:"GST_REG",
-													filterProperty:"GST_REG",
-													autoResizable:true,
-													template:new sap.m.Text({text:"{GST_REG}",maxLines:1,tooltip:"{GST_REG}"})
-												}),
-												new sap.ui.table.Column({label:new sap.m.Text({text:"GST Effective Date"}),
-													autoResizable:true,
-													sortProperty:"GST_DATE",
-													filterProperty:"GST_DATE_DESC",
-													autoResizable:true,
-													template:new sap.m.Text({text:"{GST_DATE_DESC}",maxLines:1,tooltip:"{GST_DATE_DESC}"})
-												}),
-												new sap.ui.table.Column("COMPCODE_DEL_BTN", {
-													width:"50px",
-													hAlign :"Left",
-													template: new sap.m.Button({
-														icon: "sap-icon://delete",
-														width: "100%",
-														//textAlign: "Left",
-														press: function (oEvt) {
-															var lo_index = String(oEvt.getSource().getBindingContext().getPath());
-															var lv_index = parseInt(lo_index.split("/")[1]);
-															var lt_deleted_data = gt_compcode_details.splice(lv_index,1);
-																							
-															for(var i=0; i < lt_deleted_data.length; i++){
-																if(lt_deleted_data[i].DATA_ID !== ""){
-																	gt_deleted_compcode_data.push(lt_deleted_data[i]);
-																}
-															}
-															fn_bind_bizdata(gt_compcode_details,"GO_TABLE_COMPCODE");
-															ui('TABLE_LABEL_COMPCODE').setText("Company Code ("+gt_compcode_details.length+")");
-														}
-													})
-												}),
-												
-											],
-											cellClick : function(oEvt){
-												var lv_bind = oEvt.getParameters().rowBindingContext;	
-												if(lv_bind != undefined){
-													gv_bind_mode = "edit";
-													var lv_data = ui("GO_TABLE_COMPCODE").getModel().getData();
-													var lv_row_index = oEvt.getParameters().rowIndex;
-													gv_bind_index = fn_actual_index("GO_TABLE_COMPCODE",lv_row_index);
-													fn_set_company_code_fields_visibility(lv_bind);
-												}
-											}
+						new sap.m.Button("CREATE_BP_EDIT_BTN", {
+                            visible: true,
+                            icon: "sap-icon://edit",
+                            press: function () {
+								screenMode._edit();
+                            }
+                        }),
+						new sap.m.Button("CREATE_BP_CANCEL_BTN", {
+                            visible: true,
+                            icon: "sap-icon://decline",
+                            press: function () {
+								screenMode._display(screenMode._id);
+                            }
+                        }),
+                    ]
+                }).addStyleClass('class_transparent_bar'),
+
+			],
+			content: [
+                new sap.ui.layout.Grid({
+                    defaultSpan:"L12 M12 S12",
+					width:"auto",
+					content:[
+                        new sap.ui.layout.form.SimpleForm("PANEL_FORM",{
+							title: "New Business Partner",
+                            maxContainerCols:2,
+							labelMinWidth:130,
+							content:[
+                                new sap.ui.core.Title("GENERAL_INFO_TITLE1",{text:""}),
+                                new sap.m.Label({text:"Business Partner Type",width:"160px"}).addStyleClass('class_label_padding'),
+								new sap.m.Select("BP_TYPE_INFO",{
+									width:TextWidth,
+									//selectedKey: "",
+									items: [
+										new sap.ui.core.ListItem({
+											text: "IBM",
+											key: "IBM",
+											additionalText: "IBM",
+											icon: "sap-icon://along-stacked-chart"
+										}),
+										new sap.ui.core.ListItem({
+											text: "ACT",
+											key: "ACT",
+											additionalText: "ACT",
+											icon: "sap-icon://chart-table-view"
+										}),
+										new sap.ui.core.ListItem({
+											text: "BFA",
+											key: "BFA",
+											additionalText: "BFA",
+											icon: "sap-icon://permission"
 										})
 									]
-								})
-							]
-						})
-					]
-				}),
-                new sap.uxap.ObjectPageSection("SECTION_ATTACHMENT",{
-                    title:"ATTACHMENT",
-					subSections:[
-						new sap.uxap.ObjectPageSubSection({
-                            title:"Attachment",
-							blocks:[
-							]
-						})
-					]
-				}),
-            ]      
+								}),
+                                new sap.m.Label({text:"Registered Name",width:labelWidth}).addStyleClass('class_label_padding'),
+								new sap.m.Input("BP_TYPE_REGNAME",{value:"", width:TextWidth}),
+                            	new sap.m.Label({text:"Business Partner ID",width:"150px"}).addStyleClass('class_label_padding'),
+								new sap.m.Input("INPUT_BP_ID",{
+									value:"", 
+									width:TextWidth,
+									change : function(oEvt){
+										let lv_value = oEvt.getSource().getValue().trim();
+										let label = "New Business Partner"
+										let lv_bpid = label + " (" + lv_value + ")";
+										ui("PANEL_FORM").setTitle(lv_bpid);
+										
+									}
+								}),
+                                new sap.ui.core.Title("GENERAL_INFO_TITLE2",{text:""}),
+                                new sap.m.Label({text:"External Partner",width:labelWidth}).addStyleClass('class_label_padding'),
+								new sap.m.Input("BP_TYPE_EXTPARTNER",{value:"", width:TextWidth}),
+								
+								new sap.m.Label({text:"Source System",width:labelWidth}).addStyleClass('class_label_padding'),
+								new sap.m.Input("INPUT_CONTROL_INFO_SOURCE_SYS",{width:TextWidth}),
+									
+                                new sap.m.Label({text:"Deletion Flag",width:labelWidth}).addStyleClass('class_label_padding'),
+								new sap.m.Switch("CONTROL_INFO_DEL_FLAG",{state:false}),
+                            ]
+                        })
+                    ]
+                })
+            ]
         });
 
         page.setCustomHeader(pageHeader);
         page.addContent(crumbs);
-        page.addContent(createPageForm);
+        //page.addContent(createPageFormHeader);
+		page.addContent(createPageFormContent);
         return page;
     }
 
 	function createDisplayBizPage(){
-		
-		
+				
 		var lv_Page  = new sap.m.Page("BP_PAGE_DISPLAY",{}).addStyleClass('sapUiSizeCompact');
 		
 		var lv_header = new sap.m.Bar({
@@ -371,9 +301,7 @@
 			contentLeft:[
 				new sap.m.Button({ icon:"sap-icon://nav-back",
 					press:function(oEvt){
-						//gv_flag_cancel_from = "CREATE_HOME";
-						//ui("LABEL_CONFIRMATION_DIALOG").setText("Confirm to navigate to main page?");
-						//ui("CONFIRMATION_DIALOG").open();
+						go_App_Right.back();
 					} 
 				}),
 				new sap.m.Button({icon:"sap-icon://menu2",
@@ -467,10 +395,9 @@
 				var lv_bind = oEvt.getParameters().rowBindingContext;
 				
 				if(lv_bind != undefined){
-					//var lv_addr_id = oEvt.getParameters().rowBindingContext.getProperty("ADDRESS_ID");
 					var lv_bp_id = oEvt.getParameters().rowBindingContext.getProperty("BIZPART_ID");
 					if(lv_bp_id){
-						//fn_get_addr_details(lv_bp_id,lv_addr_id);
+						screenMode._display(lv_bp_id);
 					}
 				}
 				
@@ -520,7 +447,7 @@
 				new sap.m.Button({ icon:"sap-icon://nav-back",
 					press:function(oEvt){ 
 						
-						go_App_Right.to('PAGE_SELECT_BP_SCREEN');
+						go_App_Right.back();
 						
 					}
 				}),
@@ -602,10 +529,9 @@
 				var lv_bind = oEvt.getParameters().rowBindingContext;
 				
 				if(lv_bind != undefined){
-					var lv_addr_id = oEvt.getParameters().rowBindingContext.getProperty("ADDRESS_ID");
 					var lv_bp_id = oEvt.getParameters().rowBindingContext.getProperty("BIZPART_ID");
 					if(lv_bp_id){
-						fn_get_addr_details(lv_bp_id);
+						screenMode._display(lv_bp_id);
 					}
 				}
 			},
@@ -662,10 +588,44 @@
 
 
 		return lv_Page;
+	}
+
+	function createTestPage(){
+		let page = new sap.m.Page("TEST_PAGE",{}).addStyleClass('sapUiSizeCompact');
+		let crumbs = new sap.m.Breadcrumbs("TEST_CRUMBS",{
+			currentLocationText: "Business Partner Listing",
+			links: [
+				new sap.m.Link({
+					text:"Home",
+					press:function(oEvt){
+					// fn_click_breadcrumbs("HOME");
+					}
+				}),
+				new sap.m.Link("TEST_LIST_CRUMBS",{
+					text:"Business Partner Management",
+					press:function(oEvt){
+					//  fn_click_breadcrumbs("HOME");
+					}
+				}),
+				
+			]
+		}).addStyleClass('breadcrumbs-padding');
+
+		//page.addContent(crumbs);
+		return page;
+
+
+	}
 
 
 
 
-		}
+
+
+
+
+
+
+
 
 </script>
