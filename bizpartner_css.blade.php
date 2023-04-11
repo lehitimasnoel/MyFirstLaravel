@@ -30,6 +30,17 @@
 		height: 30px;
 	}
 
+	#BP_GENERAL_PANEL .sapUiFormResLayout>div {
+    	padding: 50px;
+    	box-sizing: border-box;
+	}
+
+	.sapMSlt.sapMSltReadonly {
+		border-color: #ccc;
+		background: transparent;
+		border: 1px transparent;
+	}
+
 	
 
 
