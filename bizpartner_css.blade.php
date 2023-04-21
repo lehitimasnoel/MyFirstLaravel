@@ -40,7 +40,11 @@
 		background: transparent;
 		border: 1px transparent;
 	}
-
+	
+	#MESSAGE_STRIP_BP_ERROR .sapMPanelContent{
+		padding: 0px !important;
+		overflow: hidden;
+	}
 	
 
 
