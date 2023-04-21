@@ -124,6 +124,7 @@
 		},
 		_display : function(id){
 			ui('MESSAGE_STRIP_BP_ERROR').destroyContent().setVisible(false);
+			ui('INPUT_BP_ID').setValueState("None").setValueStateText("");
 			this._mode = "display";
 			this._id = id;
 			let bp_title = this._title;
@@ -157,6 +158,7 @@
 		},
 		_clear : function(){
 			ui('MESSAGE_STRIP_BP_ERROR').destroyContent().setVisible(false);
+			ui('INPUT_BP_ID').setValueState("None").setValueStateText("");
 			ui('BP_TYPE_INFO').setValue("");
 			ui('BP_TYPE_REGNAME').setValue("");
 			ui('INPUT_BP_ID').setValue("");
