@@ -6,6 +6,7 @@
 			BIZPART_ID      	: "100001",
 			EXT_PARTNER      	: "EXT_PARTNER1",
 			SOURCE_SYS     		: "SOURCESYS1",
+			COMPANY				: "ACN",
 			DEL_FLAG    		: true
 		},
 		{
@@ -14,6 +15,7 @@
 			BIZPART_ID      	: "100002",
 			EXT_PARTNER      	: "EXT_PARTNER2",
 			SOURCE_SYS     		: "SOURCESYS2",
+			COMPANY				: "CDA",
 			DEL_FLAG    		: true
 		}
 	];
@@ -41,6 +43,7 @@
 						bp_id.BIZPART_ID      	= ui('INPUT_BP_ID').getValue().trim();
 						bp_id.EXT_PARTNER      	= ui('BP_TYPE_EXTPARTNER').getValue().trim();
 						bp_id.SOURCE_SYS     	= ui('INPUT_CONTROL_INFO_SOURCE_SYS').getValue().trim();
+						bp_id.COMPANY			= ui("BP_COMPANY").getSelectedButton().getId();
 						bp_id.DEL_FLAG    		= ui('CONTROL_INFO_DEL_FLAG').getState();
 				}
 				
@@ -48,6 +51,28 @@
 			screenMode._display(id);
 			listingBp._getData(bizData);
 			setTimeout(() => {busyDialog.close();}, 2000);
+		},
+		_getRadioIndex : function(id){
+			let radioButton = ui("BP_COMPANY").getButtons();
+			let selectedIndex;
+			for(let i=0; i<radioButton.length; i++){
+				if(radioButton[i].getId() == id){
+					selectedIndex = i;
+				}
+			}
+
+			return selectedIndex;
+
+		},
+		_validateBP : function(id){
+			let isExist = false;
+			for(let i=0; i<bizData.length; i++){
+				if(bizData[i].BIZPART_ID == id){
+					isExist = true;
+					break;
+				}
+			}
+			return isExist;
 		}
 	}
 
@@ -76,6 +101,7 @@
 			ui('INPUT_BP_ID').setEditable(true);
 			ui('BP_TYPE_EXTPARTNER').setEditable(true);
 			ui('INPUT_CONTROL_INFO_SOURCE_SYS').setEditable(true);
+			ui('BP_COMPANY').setEditable(true);
 			ui('CONTROL_INFO_DEL_FLAG').setEnabled(true);
 
 			go_App_Right.to('CREATE_BP_PAGE');
@@ -93,9 +119,11 @@
 			ui('INPUT_BP_ID').setEditable(false);
 			ui('BP_TYPE_EXTPARTNER').setEditable(true);
 			ui('INPUT_CONTROL_INFO_SOURCE_SYS').setEditable(true);
+			ui('BP_COMPANY').setEditable(true);
 			ui('CONTROL_INFO_DEL_FLAG').setEnabled(true);
 		},
 		_display : function(id){
+			ui('MESSAGE_STRIP_BP_ERROR').destroyContent().setVisible(false);
 			this._mode = "display";
 			this._id = id;
 			let bp_title = this._title;
@@ -114,6 +142,8 @@
         		ui('INPUT_BP_ID').setValue(data[0].BIZPART_ID).setEditable(false);
 				ui('BP_TYPE_EXTPARTNER').setValue(data[0].EXT_PARTNER).setEditable(false);
 				ui('INPUT_CONTROL_INFO_SOURCE_SYS').setValue(data[0].SOURCE_SYS).setEditable(false);
+				let radioIndex = bpDataOrganizer._getRadioIndex(data[0].COMPANY);
+				ui('BP_COMPANY').setSelectedIndex(radioIndex).setEditable(false);
 				ui('CONTROL_INFO_DEL_FLAG').setState(data[0].DEL_FLAG).setEnabled(false);
 			
 			
@@ -126,15 +156,15 @@
 			}			
 		},
 		_clear : function(){
+			ui('MESSAGE_STRIP_BP_ERROR').destroyContent().setVisible(false);
 			ui('BP_TYPE_INFO').setValue("");
 			ui('BP_TYPE_REGNAME').setValue("");
 			ui('INPUT_BP_ID').setValue("");
 			ui('BP_TYPE_EXTPARTNER').setValue("");
 			ui('INPUT_CONTROL_INFO_SOURCE_SYS').setValue("");
+			ui('BP_COMPANY').setSelectedIndex(0).setEditable(true);
 			ui('CONTROL_INFO_DEL_FLAG').setEnabled(true);
 		}
-	
-	
 	};
 
     const createBP = () => {
@@ -146,6 +176,7 @@
 			BIZPART_ID      	: ui('INPUT_BP_ID').getValue().trim(),
 			EXT_PARTNER      	: ui('BP_TYPE_EXTPARTNER').getValue().trim(),
 			SOURCE_SYS     		: ui('INPUT_CONTROL_INFO_SOURCE_SYS').getValue().trim(),
+			COMPANY				: ui("BP_COMPANY").getSelectedButton().getId(),
 			DEL_FLAG    		: ui('CONTROL_INFO_DEL_FLAG').getState()
    		};
 		//add new data to array
@@ -218,6 +249,39 @@
 			ui('BP_LISTING_LABEL').setText("Business Partner (" + data.length + ")");
 		}
 	}
+
+	let lv_dialog_save = new sap.m.Dialog("BP_SAVE_DIALOG",{
+		title: "Confirmation",
+		beginButton: new sap.m.Button({
+			text:"Ok",
+			type:"Accept",
+			icon:"sap-icon://accept",
+			press:function(oEvt){
+				if(screenMode._mode == "create"){
+					createBP();
+				}else{
+					bpDataOrganizer._updateById(screenMode._id);
+				}
+
+				oEvt.getSource().getParent().close();
+			}
+		}),
+		endButton:new sap.m.Button({
+			text:"Cancel",
+			type:"Reject",
+			icon:"sap-icon://decline",
+			press:function(oEvt){
+			oEvt.getSource().getParent().close();
+			}
+		}),
+		content:[
+			new sap.m.HBox({
+				items:[
+				new sap.m.Label({text:"Confirm to save changes?"})
+				]
+			})
+		]
+	}).addStyleClass('sapUiSizeCompact');
 
 
 
