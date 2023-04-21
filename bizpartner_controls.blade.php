@@ -194,6 +194,7 @@
                             visible: true,
                             icon: "sap-icon://save",
                             press: function () {
+								ui('INPUT_BP_ID').setValueState("None").setValueStateText("");
 								ui('MESSAGE_STRIP_BP_ERROR').destroyContent().setVisible(false);
 								let bpId = ui('INPUT_BP_ID').getValue().trim();
 								let message = "";
@@ -203,6 +204,7 @@
 											let isExist = bpDataOrganizer._validateBP(bpId);
 											if(isExist){
 												message = "Business Partner ID already exist";
+												ui('INPUT_BP_ID').setValueState("Error").setValueStateText(message);
 												lv_message_strip = fn_show_message_strip("MESSAGE_STRIP_BP_ERROR",message);
 												ui('MESSAGE_STRIP_BP_ERROR').setVisible(true).addContent(lv_message_strip);
 											}else{
@@ -214,6 +216,7 @@
 										
 									}else{
 										message = "Business Partner ID is mandatory";
+										ui('INPUT_BP_ID').setValueState("Error").setValueStateText(message);
 										lv_message_strip = fn_show_message_strip("MESSAGE_STRIP_BP_ERROR",message);
 										ui('MESSAGE_STRIP_BP_ERROR').setVisible(true).addContent(lv_message_strip);
 									}
