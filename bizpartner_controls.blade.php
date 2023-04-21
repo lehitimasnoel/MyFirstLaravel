@@ -159,7 +159,7 @@
 				
             ]
         });
-
+		let errorPanel = new sap.m.Panel("MESSAGE_STRIP_BP_ERROR",{visible:false});
         let createPageFormHeader = new sap.uxap.ObjectPageLayout({
             headerTitle:[
                 new sap.uxap.ObjectPageHeader("OBJECTHEADER_BP_NAME",{
@@ -194,11 +194,30 @@
                             visible: true,
                             icon: "sap-icon://save",
                             press: function () {
-								if(screenMode._mode == "create"){
-									createBP();
-								}else{
-									bpDataOrganizer._updateById(screenMode._id);
-								}
+								ui('MESSAGE_STRIP_BP_ERROR').destroyContent().setVisible(false);
+								let bpId = ui('INPUT_BP_ID').getValue().trim();
+								let message = "";
+								let lv_message_strip = "";
+									if(bpId){
+										if(screenMode._mode == "create"){
+											let isExist = bpDataOrganizer._validateBP(bpId);
+											if(isExist){
+												message = "Business Partner ID already exist";
+												lv_message_strip = fn_show_message_strip("MESSAGE_STRIP_BP_ERROR",message);
+												ui('MESSAGE_STRIP_BP_ERROR').setVisible(true).addContent(lv_message_strip);
+											}else{
+												ui('BP_SAVE_DIALOG').open();
+											}
+										}else{
+											ui('BP_SAVE_DIALOG').open();
+										}
+										
+									}else{
+										message = "Business Partner ID is mandatory";
+										lv_message_strip = fn_show_message_strip("MESSAGE_STRIP_BP_ERROR",message);
+										ui('MESSAGE_STRIP_BP_ERROR').setVisible(true).addContent(lv_message_strip);
+									}
+												
                             }
                         }),
 						new sap.m.Button("CREATE_BP_EDIT_BTN", {
@@ -261,6 +280,9 @@
 								new sap.m.Input("INPUT_BP_ID",{
 									value:"", 
 									width:TextWidth,
+									liveChange: function(oEvt){
+										fn_livechange_numeric_input(oEvt);
+									},
 									change : function(oEvt){
 										let lv_value = oEvt.getSource().getValue().trim();
 										let label = "New Business Partner"
@@ -268,6 +290,23 @@
 										ui("PANEL_FORM").setTitle(lv_bpid);
 										
 									}
+								}),
+								new sap.m.Label({text:"Company",width:"150px"}).addStyleClass('class_label_padding'),
+								new sap.m.RadioButtonGroup("BP_COMPANY",{
+									buttons: [
+										new sap.m.RadioButton({
+											id:"ACN",
+											text: "Accenture"
+										}),
+										new sap.m.RadioButton({
+											id:"CDA",
+											text: "Coding Avenue"
+										}),
+										new sap.m.RadioButton({
+											id:"SUN",
+											text: "Sun Asterisk"
+										}),
+									]
 								}),
                                 new sap.ui.core.Title("GENERAL_INFO_TITLE2",{text:""}),
                                 new sap.m.Label({text:"External Partner",width:labelWidth}).addStyleClass('class_label_padding'),
@@ -287,6 +326,7 @@
 
         page.setCustomHeader(pageHeader);
         page.addContent(crumbs);
+		page.addContent(errorPanel);
         //page.addContent(createPageFormHeader);
 		page.addContent(createPageFormContent);
         return page;
@@ -616,15 +656,6 @@
 
 
 	}
-
-
-
-
-
-
-
-
-
 
 
 
