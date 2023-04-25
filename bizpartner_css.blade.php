@@ -45,7 +45,22 @@
 		padding: 0px !important;
 		overflow: hidden;
 	}
-	
+	.sapMShellBrandingBar {
+		background-color: #0d192d;
+	}
+
+	.sapMIBar.sapMHeader-CTX{
+		background-color: #0d192d;
+	}
+
+	.sapMIBar-CTX .sapMLabel {
+    	color: #fff;
+	}
+
+	.buttonHeaderColor .sapMBtnIcon {
+		color: #fff;
+
+	}
 
 
 
