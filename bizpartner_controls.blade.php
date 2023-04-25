@@ -57,9 +57,13 @@
 						go_App_Right.to('BP_PAGE_DISPLAY');
 					break;
 					case "BP_LIST" :
-
-						listingBp._getData(bizData);
-						go_App_Right.to('PAGE_BP_LISTING');
+						let response = async () => {
+							let data = await bpDataOrganizer._getBpData();
+							listingBp._getData(data);
+							go_App_Right.to('PAGE_BP_LISTING');
+						}
+						response();
+						
 					break;
 					case "BP_TEST" :
 
@@ -122,7 +126,7 @@
 					press:function(oEvt){
 						go_App_Right.back();
 					} 
-				}),
+				}).addStyleClass('buttonHeaderColor'),
 				new sap.m.Button({icon:"sap-icon://menu2",
 					press:function(){
 						go_SplitContainer.setSecondaryContentWidth("250px");
@@ -133,8 +137,16 @@
 						}
 					
 					}
-				}), 
+				}).addStyleClass('buttonHeaderColor'), 
 				
+			],
+			contentRight:[
+				new sap.m.Button({
+					icon: "sap-icon://home",
+					press: function(){
+						window.location.href = MainPageLink; 
+					}
+				}).addStyleClass('buttonHeaderColor')
 			],
 			contentMiddle:[
                 new sap.m.Label("BP_TITLE",{text:"Create Business Partner"})
@@ -237,6 +249,13 @@
 								screenMode._display(screenMode._id);
                             }
                         }),
+						new sap.m.Button("CREATE_BP_DEL_BTN", {
+                            visible: true,
+                            icon: "sap-icon://delete",
+                            press: function () {
+								ui('BP_DELETE_DIALOG').open();
+                            }
+                        }),
                     ]
                 }).addStyleClass('class_transparent_bar'),
 
@@ -316,7 +335,7 @@
 								new sap.m.Input("BP_TYPE_EXTPARTNER",{value:"", width:TextWidth}),
 								
 								new sap.m.Label({text:"Source System",width:labelWidth}).addStyleClass('class_label_padding'),
-								new sap.m.Input("INPUT_CONTROL_INFO_SOURCE_SYS",{width:TextWidth}),
+								new sap.m.Input("INPUT_CONTROL_INFO_SOURCE_SYS",{width:TextWidth,maxLength:10}),
 									
                                 new sap.m.Label({text:"Deletion Flag",width:labelWidth}).addStyleClass('class_label_padding'),
 								new sap.m.Switch("CONTROL_INFO_DEL_FLAG",{state:false}),
@@ -346,7 +365,7 @@
 					press:function(oEvt){
 						go_App_Right.back();
 					} 
-				}),
+				}).addStyleClass('buttonHeaderColor'),
 				new sap.m.Button({icon:"sap-icon://menu2",
 					press:function(){
 						go_SplitContainer.setSecondaryContentWidth("250px");
@@ -356,7 +375,7 @@
 							go_SplitContainer.setShowSecondaryContent(false);
 						}
 					}
-				})
+				}).addStyleClass('buttonHeaderColor')
 				//new sap.m.Image({src: logo_path}),
 			],
 
@@ -368,7 +387,7 @@
 					press: function(){
 						window.location.href = MainPageLink; 
 					}
-				})
+				}).addStyleClass('buttonHeaderColor')
 			]
 		});
 		
@@ -493,7 +512,7 @@
 						go_App_Right.back();
 						
 					}
-				}),
+				}).addStyleClass('buttonHeaderColor'),
 				new sap.m.Button({icon:"sap-icon://menu2",
 					press:function(){
 						go_SplitContainer.setSecondaryContentWidth("270px");
@@ -503,7 +522,7 @@
 							go_SplitContainer.setShowSecondaryContent(false);
 						}
 					}
-				}), 
+				}).addStyleClass('buttonHeaderColor'), 
 				//new sap.m.Image({src: logo_path}),
 				],
 			contentMiddle:[gv_Lbl_NewPrdPage_Title = new sap.m.Label("BP_LISTING_PAGE_LABEL",{text:"Business Partner Listing"})],
@@ -515,7 +534,7 @@
 					press: function(){
 					window.location.href = MainPageLink; 
 					}
-				})
+				}).addStyleClass('buttonHeaderColor')
 			]
 		});
 					
@@ -561,6 +580,11 @@
                             visible: true,
                             icon: "sap-icon://download",
                             press: function () {
+								if(ui('BP_LISTING_TABLE').getModel().getData().length == 0){
+									fn_show_message_toast("No data to download");
+								}else{
+									fn_download_bp_listing();
+								}
 								
                             }
                         })
